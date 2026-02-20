@@ -8,14 +8,11 @@ export function activate(context: vscode.ExtensionContext) {
     vscode.window.showInformationMessage('BabyCoding: Extension Activating...');
 
     try {
-        // Register the Webview View Provider
-        // Hardcoded view ID to ensure match with package.json
         const VIEW_ID = 'babycoding-view';
         console.log('BabyCoding: Registering provider for', VIEW_ID);
         
         const provider = new BabyCodingPanel(context.extensionUri);
         
-        // Ensure the registration is pushed to subscriptions immediately
         const registration = vscode.window.registerWebviewViewProvider(
             VIEW_ID, 
             provider,
@@ -23,12 +20,18 @@ export function activate(context: vscode.ExtensionContext) {
                 webviewOptions: { retainContextWhenHidden: true }
             }
         );
+        // Explicitly add to subscriptions immediately
         context.subscriptions.push(registration);
+        
+        // Force provider to resolve (hack for stubborn views)
+        // This triggers the resolveWebviewView method manually if VS Code missed it
+        // (Note: we can't really force resolveWebviewView from outside, 
+        // but we can ensure the object is alive)
         
         console.log('BabyCoding: WebviewViewProvider registered successfully');
         vscode.window.showInformationMessage('BabyCoding: Ready!');
 
-        let askSelectionDisposable = vscode.commands.registerCommand('babycoding.askSelection', () => {
+        // ... rest of commands ...
             const editor = vscode.window.activeTextEditor;
             if (editor) {
                 const selection = editor.selection;

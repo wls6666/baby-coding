@@ -1,11 +1,15 @@
 import * as vscode from 'vscode';
 import { BabyCodingPanel } from './panels/BabyCodingPanel';
 
+console.log('BabyCoding: Extension file is loading...');
+
 export function activate(context: vscode.ExtensionContext) {
-    console.log('Congratulations, your extension "baby-coding" is now active!');
+    console.log('BabyCoding: activate() called');
+    vscode.window.showInformationMessage('BabyCoding: Extension Activating...');
 
     try {
         // Register the Webview View Provider
+        console.log('BabyCoding: Registering provider for', BabyCodingPanel.viewType);
         const provider = new BabyCodingPanel(context.extensionUri);
         
         // Ensure the registration is pushed to subscriptions immediately
@@ -18,7 +22,8 @@ export function activate(context: vscode.ExtensionContext) {
         );
         context.subscriptions.push(registration);
         
-        console.log('BabyCoding: WebviewViewProvider registered for', BabyCodingPanel.viewType);
+        console.log('BabyCoding: WebviewViewProvider registered successfully');
+        vscode.window.showInformationMessage('BabyCoding: Ready!');
 
         let askSelectionDisposable = vscode.commands.registerCommand('babycoding.askSelection', () => {
             const editor = vscode.window.activeTextEditor;

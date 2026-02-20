@@ -32,8 +32,10 @@ export function activate(context: vscode.ExtensionContext) {
         const VIEW_ID = 'babycoding-view';
         console.log(`BabyCoding: Registering SimpleProvider for ${VIEW_ID}`);
         
+        // Make provider persistent by assigning to a module-level variable or global
         const provider = new SimpleProvider();
         
+        // Pass context to subscription to ensure it lives as long as the extension
         const registration = vscode.window.registerWebviewViewProvider(
             VIEW_ID, 
             provider,
@@ -41,6 +43,13 @@ export function activate(context: vscode.ExtensionContext) {
         );
         
         context.subscriptions.push(registration);
+        
+        // Add a secondary command to force-refresh the view
+        context.subscriptions.push(
+            vscode.commands.registerCommand('babycoding.refreshView', () => {
+                vscode.commands.executeCommand('workbench.view.extension.babycoding-sidebar');
+            })
+        );
         
         console.log('BabyCoding: Registered successfully');
         vscode.window.showInformationMessage('BabyCoding: View Registered!');

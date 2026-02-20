@@ -7,9 +7,18 @@ export function activate(context: vscode.ExtensionContext) {
     try {
         // Register the Webview View Provider
         const provider = new BabyCodingPanel(context.extensionUri);
-        context.subscriptions.push(
-            vscode.window.registerWebviewViewProvider(BabyCodingPanel.viewType, provider)
+        
+        // Ensure the registration is pushed to subscriptions immediately
+        const registration = vscode.window.registerWebviewViewProvider(
+            BabyCodingPanel.viewType, 
+            provider,
+            {
+                webviewOptions: { retainContextWhenHidden: true }
+            }
         );
+        context.subscriptions.push(registration);
+        
+        console.log('BabyCoding: WebviewViewProvider registered for', BabyCodingPanel.viewType);
 
         let askSelectionDisposable = vscode.commands.registerCommand('babycoding.askSelection', () => {
             const editor = vscode.window.activeTextEditor;

@@ -14,6 +14,8 @@ export class BabyCodingPanel implements vscode.WebviewViewProvider {
   private _tutorAgent?: TutorAgent;
   private _isPlanningMode = false;
   private _currentPlan?: ProjectPlan;
+  private _viewReady = false;
+  private _pendingMessages: any[] = [];
 
   private _chatHistory: LLMMessage[] = [
     { role: 'system', content: 'You are BabyCoding, a helpful coding assistant for absolute beginners. Explain things simply. Use Chinese for explanations unless asked otherwise.' }
@@ -24,9 +26,15 @@ export class BabyCodingPanel implements vscode.WebviewViewProvider {
   }
 
   public async ask(question: string) {
-    if (this._view) {
-        this._view.webview.postMessage({ type: 'userQuestion', message: question });
+    const msg = { type: 'userQuestion', message: question };
+    
+    if (this._view && this._viewReady) {
+        this._view.webview.postMessage(msg);
         await this._handleChatMessage(question);
+    } else {
+        // Queue the message and ensure view is focused/created
+        this._pendingMessages.push({ ...msg, isAsk: true });
+        vscode.commands.executeCommand('babycoding-view.focus');
     }
   }
 
@@ -47,6 +55,20 @@ export class BabyCodingPanel implements vscode.WebviewViewProvider {
 
     webviewView.webview.onDidReceiveMessage(async (data) => {
       switch (data.type) {
+        case 'webviewReady': {
+            console.log('Webview is ready');
+            this._viewReady = true;
+            while (this._pendingMessages.length > 0) {
+                const msg = this._pendingMessages.shift();
+                if (msg.isAsk) {
+                    this._view?.webview.postMessage({ type: msg.type, message: msg.message });
+                    await this._handleChatMessage(msg.message);
+                } else {
+                    this._view?.webview.postMessage(msg);
+                }
+            }
+            break;
+        }
         case "startProject": {
             this._isPlanningMode = true;
             this._view?.webview.postMessage({ type: 'chatResponse', message: "What do you want to build? (Tell me your idea, e.g., 'A snake game' or 'A personal website')\n\n你想做什么项目？（告诉我你的想法，比如“贪吃蛇游戏”或“个人网站”）" });
@@ -472,6 +494,9 @@ export class BabyCodingPanel implements vscode.WebviewViewProvider {
                         break;
                 }
             });
+
+            // Signal ready
+            vscode.postMessage({ type: 'webviewReady' });
         </script>
     </body>
     </html>`;

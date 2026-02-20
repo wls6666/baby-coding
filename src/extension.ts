@@ -1,65 +1,53 @@
 import * as vscode from 'vscode';
-import { BabyCodingPanel } from './panels/BabyCodingPanel';
 
-console.log('BabyCoding: Extension file is loading...');
+// Inline Simple Provider to debug registration issues
+class SimpleProvider implements vscode.WebviewViewProvider {
+    resolveWebviewView(webviewView: vscode.WebviewView, _context: vscode.WebviewViewResolveContext, _token: vscode.CancellationToken) {
+        console.log('SimpleProvider.resolveWebviewView called');
+        webviewView.webview.options = { enableScripts: true };
+        webviewView.webview.html = `
+            <!DOCTYPE html>
+            <html>
+            <head>
+                <meta charset="UTF-8">
+                <style>body{font-family:sans-serif;padding:10px;}</style>
+            </head>
+            <body>
+                <h1>BabyCoding Debug v0.2.95</h1>
+                <p>✅ View Provider Registered Successfully!</p>
+                <p>If you can see this, the core connection is working.</p>
+                <p>Time: ${new Date().toLocaleTimeString()}</p>
+            </body>
+            </html>
+        `;
+    }
+}
 
 export function activate(context: vscode.ExtensionContext) {
-    console.log('BabyCoding: activate() called');
-    vscode.window.showInformationMessage('BabyCoding: Extension Activating...');
+    console.log('BabyCoding: activate() called - v0.2.95');
+    // Show a message immediately to confirm activation
+    vscode.window.showInformationMessage('BabyCoding: v0.2.95 Activating...');
 
     try {
         const VIEW_ID = 'babycoding-view';
-        console.log('BabyCoding: Registering provider for', VIEW_ID);
+        console.log(`BabyCoding: Registering SimpleProvider for ${VIEW_ID}`);
         
-        const provider = new BabyCodingPanel(context.extensionUri);
+        const provider = new SimpleProvider();
         
         const registration = vscode.window.registerWebviewViewProvider(
             VIEW_ID, 
             provider,
-            {
-                webviewOptions: { retainContextWhenHidden: true }
-            }
+            { webviewOptions: { retainContextWhenHidden: true } }
         );
-        // Explicitly add to subscriptions immediately
+        
         context.subscriptions.push(registration);
         
-        // Force provider to resolve (hack for stubborn views)
-        // This triggers the resolveWebviewView method manually if VS Code missed it
-        // (Note: we can't really force resolveWebviewView from outside, 
-        // but we can ensure the object is alive)
-        
-        console.log('BabyCoding: WebviewViewProvider registered successfully');
-        vscode.window.showInformationMessage('BabyCoding: Ready!');
+        console.log('BabyCoding: Registered successfully');
+        vscode.window.showInformationMessage('BabyCoding: View Registered!');
 
-        let askSelectionDisposable = vscode.commands.registerCommand('babycoding.askSelection', () => {
-            const editor = vscode.window.activeTextEditor;
-            if (editor) {
-                const selection = editor.selection;
-                const text = editor.document.getText(selection);
-                if (text) {
-                    vscode.commands.executeCommand('babycoding-view.focus');
-                    provider.ask(`Explain this code:\n\`\`\`\n${text}\n\`\`\``);
-                } else {
-                    vscode.window.showInformationMessage('Please select some code first.');
-                }
-            }
-        });
-        context.subscriptions.push(askSelectionDisposable);
-
-        let startDisposable = vscode.commands.registerCommand('babycoding.start', () => {
-            vscode.window.showInformationMessage('BabyCoding: Let\'s build something!');
-        });
-        
-        let setupDisposable = vscode.commands.registerCommand('babycoding.setup', () => {
-            // Logic for setup wizard
-            vscode.window.showInformationMessage('BabyCoding: Starting Setup Wizard...');
-        });
-
-        context.subscriptions.push(startDisposable);
-        context.subscriptions.push(setupDisposable);
     } catch (error) {
-        console.error('Extension activation failed:', error);
-        vscode.window.showErrorMessage(`BabyCoding failed to activate: ${error}`);
+        console.error('BabyCoding Activation Error:', error);
+        vscode.window.showErrorMessage(`BabyCoding Error: ${error}`);
     }
 }
 

@@ -27,35 +27,47 @@ class SimpleProvider implements vscode.WebviewViewProvider {
 console.log('BabyCoding: Extension file LOADED (Top Level)');
 
 export function activate(context: vscode.ExtensionContext) {
-    console.log('BabyCoding: activate() called - v0.0.2 DEBUG');
-    vscode.window.showInformationMessage('BabyCoding DEBUG: Extension Loaded!');
+    console.log('BabyCoding: activate() called - v0.0.3 PANEL MODE');
+    vscode.window.showInformationMessage('BabyCoding: v0.0.3 Loaded');
 
-    // Register a simple Hello World command to verify basic functionality
+    // STRATEGY 1: The Sidebar (Try one last time with a fresh ID)
+    try {
+        const SIDEBAR_ID = 'babycoding-view-sidebar'; // NEW ID
+        console.log(`BabyCoding: Registering Sidebar ${SIDEBAR_ID}`);
+        const provider = new SimpleProvider();
+        context.subscriptions.push(
+            vscode.window.registerWebviewViewProvider(SIDEBAR_ID, provider)
+        );
+    } catch (e) {
+        console.error('Sidebar registration failed:', e);
+    }
+
+    // STRATEGY 2: The Panel (The "Nuclear Option")
+    // If the sidebar fails, this command forces a panel to open.
+    // This uses a completely different API (createWebviewPanel) which usually works when Sidebars fail.
     context.subscriptions.push(
-        vscode.commands.registerCommand('babycoding.hello', () => {
-            vscode.window.showInformationMessage('Hello from BabyCoding Debug!');
+        vscode.commands.registerCommand('babycoding.start', () => {
+            vscode.window.showInformationMessage('Opening BabyCoding Panel...');
+            
+            const panel = vscode.window.createWebviewPanel(
+                'babycoding-panel', // Internal ID
+                'BabyCoding Board', // Title
+                vscode.ViewColumn.One, // Column
+                { enableScripts: true, retainContextWhenHidden: true }
+            );
+
+            panel.webview.html = `
+                <!DOCTYPE html>
+                <html>
+                <body style="padding:20px; font-family: sans-serif;">
+                    <h1>🚀 BabyCoding Panel</h1>
+                    <p>If you see this, the Webview is working!</p>
+                    <p>This is a standalone panel, bypassing the sidebar issues.</p>
+                </body>
+                </html>
+            `;
         })
     );
-
-    try {
-        const VIEW_ID = 'babycoding-view';
-        console.log(`BabyCoding: Registering SimpleProvider for ${VIEW_ID}`);
-        
-        const provider = new SimpleProvider();
-        
-        const registration = vscode.window.registerWebviewViewProvider(
-            VIEW_ID, 
-            provider,
-            { webviewOptions: { retainContextWhenHidden: true } }
-        );
-        
-        context.subscriptions.push(registration);
-        console.log('BabyCoding: Provider Registered');
-
-    } catch (e) {
-        console.error('BabyCoding Provider Error:', e);
-        vscode.window.showErrorMessage(`Provider Error: ${e}`);
-    }
 }
 
 export function deactivate() {}

@@ -58,6 +58,22 @@ export function activate(context: vscode.ExtensionContext) {
         console.error('BabyCoding Activation Error:', error);
         vscode.window.showErrorMessage(`BabyCoding Error: ${error}`);
     }
+
+    // Move command registration outside the try-catch block and ensure it happens
+    // Register commands regardless of view status
+    context.subscriptions.push(
+        vscode.commands.registerCommand('babycoding.start', () => {
+            vscode.window.showInformationMessage('BabyCoding: Start command executed!');
+            // Try to focus view when command is run
+            vscode.commands.executeCommand('babycoding-view.focus');
+        })
+    );
+    
+    context.subscriptions.push(
+        vscode.commands.registerCommand('babycoding.debug', () => {
+             vscode.window.showInformationMessage(`Extension Active: ${context.extension.id}`);
+        })
+    );
 }
 
 export function deactivate() {}

@@ -17,6 +17,7 @@
     "Education"
   ],
   "activationEvents": [
+    "onStartupFinished",
     "onCommand:babycoding.start",
     "onView:babycoding-view"
   ],

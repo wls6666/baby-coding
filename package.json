@@ -3,7 +3,7 @@
   "publisher": "babycoding-team",
   "displayName": "BabyCoding",
   "description": "A Beginner Dev OS for VS Code - Learn by Doing with AI",
-  "version": "0.2.8",
+  "version": "0.2.9",
   "license": "MIT",
   "repository": {
     "type": "git",
@@ -51,7 +51,7 @@
         {
           "id": "babycoding-sidebar-v2",
           "title": "BabyCoding",
-          "icon": "icon.jpg"
+          "icon": "resources/icon.svg"
         }
       ]
     },

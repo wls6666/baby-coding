@@ -4,7 +4,7 @@
 > *Make coding as easy as chatting - An AI-Native Dev Environment for absolute beginners.*
 
 ![License](https://img.shields.io/badge/license-MIT-blue.svg)
-![Version](https://img.shields.io/badge/version-0.2.2-green.svg)
+![Version](https://img.shields.io/badge/version-0.2.3-green.svg)
 ![Status](https://img.shields.io/badge/status-Alpha-orange.svg)
 
 **BabyCoding** 是一个运行在 VS Code 中的插件，但它不仅仅是一个插件。它是为**零基础编程新手**设计的“操作系统”。它的目标是消除所有技术障碍（环境配置、命令行、Git、报错调试），让你只关注**想法**本身。

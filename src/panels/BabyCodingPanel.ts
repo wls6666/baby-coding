@@ -35,6 +35,7 @@ export class BabyCodingPanel implements vscode.WebviewViewProvider {
     _context: vscode.WebviewViewResolveContext,
     _token: vscode.CancellationToken
   ) {
+    console.log('BabyCodingPanel.resolveWebviewView called');
     this._view = webviewView;
 
     webviewView.webview.options = {
@@ -214,111 +215,179 @@ export class BabyCodingPanel implements vscode.WebviewViewProvider {
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <title>BabyCoding</title>
         <style>
+            :root {
+                --chat-bg: var(--vscode-editor-background);
+                --user-msg-bg: var(--vscode-button-background);
+                --user-msg-fg: var(--vscode-button-foreground);
+                --ai-msg-bg: var(--vscode-editor-inactiveSelectionBackground);
+                --ai-msg-fg: var(--vscode-editor-foreground);
+                --border-color: var(--vscode-widget-border);
+            }
             body { 
                 font-family: var(--vscode-font-family); 
-                padding: 10px; 
+                padding: 16px; 
                 display: flex; 
                 flex-direction: column; 
                 height: 100vh; 
                 box-sizing: border-box;
+                background-color: var(--chat-bg);
+                color: var(--ai-msg-fg);
             }
-            .header { margin-bottom: 10px; text-align: center; }
-            .header h1 { margin: 0; font-size: 1.2em; }
             
+            /* Welcome Guide */
+            .welcome-guide {
+                text-align: center;
+                margin-bottom: 20px;
+                padding: 15px;
+                background-color: var(--ai-msg-bg);
+                border-radius: 8px;
+                border: 1px solid var(--border-color);
+            }
+            .welcome-title { font-size: 1.4em; font-weight: bold; margin-bottom: 10px; }
+            .welcome-desc { margin-bottom: 15px; opacity: 0.9; line-height: 1.4; }
+            .feature-list { text-align: left; margin: 10px 0; padding-left: 20px; font-size: 0.9em; }
+            
+            /* Chat Area */
             #chat-container {
                 flex: 1;
                 overflow-y: auto;
-                margin-bottom: 10px;
-                border: 1px solid var(--vscode-widget-border);
-                padding: 10px;
-                border-radius: 5px;
-                background-color: var(--vscode-editor-background);
+                margin-bottom: 15px;
+                padding-right: 5px;
             }
             
-            .message { margin-bottom: 8px; padding: 8px; border-radius: 5px; word-wrap: break-word; white-space: pre-wrap; }
+            .message { 
+                margin-bottom: 12px; 
+                padding: 10px 14px; 
+                border-radius: 8px; 
+                word-wrap: break-word; 
+                white-space: pre-wrap; 
+                max-width: 85%;
+                line-height: 1.5;
+            }
             .user-message { 
-                background-color: var(--vscode-button-background); 
-                color: var(--vscode-button-foreground); 
+                background-color: var(--user-msg-bg); 
+                color: var(--user-msg-fg); 
                 align-self: flex-end; 
-                margin-left: 20px;
+                margin-left: auto;
+                border-bottom-right-radius: 2px;
             }
             .ai-message { 
-                background-color: var(--vscode-editor-inactiveSelectionBackground); 
-                color: var(--vscode-editor-foreground); 
+                background-color: var(--ai-msg-bg); 
+                color: var(--ai-msg-fg); 
                 align-self: flex-start; 
-                margin-right: 20px;
+                margin-right: auto;
+                border-bottom-left-radius: 2px;
             }
             
             /* Plan Styles */
             .plan-container {
-                background-color: var(--vscode-editor-inactiveSelectionBackground);
-                border-radius: 5px;
-                padding: 10px;
-                margin-bottom: 10px;
+                background-color: var(--ai-msg-bg);
+                border-radius: 8px;
+                padding: 12px;
+                margin-bottom: 12px;
+                border: 1px solid var(--border-color);
             }
-            .plan-title { font-weight: bold; font-size: 1.1em; margin-bottom: 5px; }
-            .plan-goal { font-style: italic; margin-bottom: 10px; opacity: 0.8; }
+            .plan-title { font-weight: bold; font-size: 1.1em; margin-bottom: 8px; border-bottom: 1px solid var(--border-color); padding-bottom: 5px; }
+            .plan-goal { font-style: italic; margin-bottom: 12px; opacity: 0.8; font-size: 0.95em; }
             .step-item {
-                background-color: var(--vscode-editor-background);
-                padding: 8px;
-                margin-bottom: 5px;
-                border-radius: 3px;
-                border: 1px solid var(--vscode-widget-border);
+                background-color: var(--chat-bg);
+                padding: 10px;
+                margin-bottom: 8px;
+                border-radius: 6px;
+                border: 1px solid var(--border-color);
             }
-            .step-header { display: flex; justify-content: space-between; align-items: center; }
-            .step-title { font-weight: bold; }
-            .step-desc { font-size: 0.9em; margin-top: 5px; opacity: 0.9; }
+            .step-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px; }
+            .step-title { font-weight: 600; font-size: 0.95em; }
+            .step-desc { font-size: 0.9em; opacity: 0.9; }
             .run-btn {
                 background-color: var(--vscode-button-background);
                 color: var(--vscode-button-foreground);
                 border: none;
-                padding: 4px 8px;
+                padding: 4px 10px;
                 cursor: pointer;
-                font-size: 0.8em;
-                border-radius: 2px;
+                font-size: 0.85em;
+                border-radius: 4px;
+                transition: opacity 0.2s;
             }
-            .run-btn:hover { background-color: var(--vscode-button-hoverBackground); }
+            .run-btn:hover { opacity: 0.9; }
 
-            .input-area { display: flex; gap: 5px; }
+            /* Input Area */
+            .input-area { 
+                display: flex; 
+                gap: 8px; 
+                padding-top: 10px;
+                border-top: 1px solid var(--border-color);
+            }
             input[type="text"] {
                 flex: 1;
-                padding: 8px;
+                padding: 10px;
                 background-color: var(--vscode-input-background);
                 color: var(--vscode-input-foreground);
                 border: 1px solid var(--vscode-input-border);
-                border-radius: 3px;
+                border-radius: 4px;
+                outline: none;
             }
-            button { 
+            input[type="text"]:focus {
+                border-color: var(--vscode-focusBorder);
+            }
+            button.send-btn { 
                 background-color: var(--vscode-button-background); 
                 color: var(--vscode-button-foreground); 
                 border: none; 
-                padding: 8px 12px; 
+                padding: 0 16px; 
                 cursor: pointer; 
-                border-radius: 3px;
+                border-radius: 4px;
+                font-weight: 600;
             }
-            button:hover { background-color: var(--vscode-button-hoverBackground); }
+            button.send-btn:hover { background-color: var(--vscode-button-hoverBackground); }
             
-            .actions { display: flex; gap: 5px; margin-bottom: 10px; justify-content: center; }
-            .actions button { font-size: 0.8em; padding: 5px 10px; }
+            /* Quick Actions */
+            .actions { 
+                display: flex; 
+                gap: 8px; 
+                margin-bottom: 15px; 
+                justify-content: center; 
+                flex-wrap: wrap;
+            }
+            .action-btn { 
+                background-color: var(--ai-msg-bg);
+                color: var(--ai-msg-fg);
+                border: 1px solid var(--border-color);
+                padding: 6px 12px;
+                border-radius: 15px;
+                font-size: 0.85em;
+                cursor: pointer;
+                transition: background-color 0.2s;
+            }
+            .action-btn:hover { background-color: var(--border-color); }
         </style>
     </head>
     <body>
-        <div class="header">
-            <h1>BabyCoding</h1>
-        </div>
-
-        <div class="actions">
-            <button id="btn-setup">⚙️ Setup</button>
-            <button id="btn-newproject">🚀 New Project</button>
-        </div>
-
         <div id="chat-container">
-            <div class="message ai-message">Hi! I'm BabyCoding. What do you want to build today? (你好！我是 BabyCoding。今天想做点什么？)</div>
+            <div class="welcome-guide">
+                <div class="welcome-title">👶 BabyCoding Guide</div>
+                <div class="welcome-desc">
+                    欢迎来到 BabyCoding！这里是你的零基础编程乐园。<br>
+                    Welcome! Let's build something fun.
+                </div>
+                <ul class="feature-list">
+                    <li>🚀 <b>New Project</b>: 告诉我你想做什么（如“贪吃蛇”）</li>
+                    <li>⚙️ <b>Setup</b>: 检查并安装 Git/Node/Python</li>
+                    <li>💡 <b>Ask</b>: 选中代码右键 "Ask BabyCoding"</li>
+                </ul>
+            </div>
+            
+            <div class="actions">
+                <button id="btn-setup" class="action-btn">⚙️ Environment Setup</button>
+                <button id="btn-newproject" class="action-btn">🚀 Start New Project</button>
+            </div>
+
+            <div class="message ai-message">你好！我是 BabyCoding。你可以直接在这里告诉我你的想法，或者点击上方的按钮开始。<br>What do you want to build today?</div>
         </div>
 
         <div class="input-area">
-            <input type="text" id="messageInput" placeholder="Type your idea... (输入你的想法...)" />
-            <button id="btn-send">Send</button>
+            <input type="text" id="messageInput" placeholder="在此输入你的想法... (Type your idea here...)" />
+            <button id="btn-send" class="send-btn">Send</button>
         </div>
         
         <script nonce="${nonce}">
@@ -362,7 +431,7 @@ export class BabyCodingPanel implements vscode.WebviewViewProvider {
             function addMessage(text, className) {
                 const div = document.createElement('div');
                 div.className = 'message ' + className;
-                div.textContent = text;
+                div.innerHTML = text.replace(/\\n/g, '<br>'); // Simple formatting
                 chatContainer.appendChild(div);
                 chatContainer.scrollTop = chatContainer.scrollHeight;
             }
@@ -378,7 +447,6 @@ export class BabyCodingPanel implements vscode.WebviewViewProvider {
                     html += '<div class="step-item">';
                     html += '<div class="step-header">';
                     html += '<span class="step-title">' + step.title + '</span>';
-                    // Use window.executeStep
                     html += '<button class="run-btn" onclick="window.executeStep(\\'' + step.id + '\\')">▶ Run</button>';
                     html += '</div>';
                     html += '<div class="step-desc">' + step.description + '</div>';

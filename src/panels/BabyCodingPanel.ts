@@ -7,7 +7,8 @@ import { TutorAgent } from "../agents/tutor";
 
 export class BabyCodingPanel implements vscode.WebviewViewProvider {
   public static readonly viewType = "babycoding-view-v2";
-  private _view?: vscode.WebviewView;
+  private _webview?: vscode.Webview;
+  private _panel?: vscode.WebviewPanel;
   private _llmService?: LLMService;
   private _plannerAgent?: PlannerAgent;
   private _builderAgent?: BuilderAgent;
@@ -26,16 +27,27 @@ export class BabyCodingPanel implements vscode.WebviewViewProvider {
       this._builderAgent = new BuilderAgent();
   }
 
+  public setupPanel(panel: vscode.WebviewPanel) {
+      console.log('BabyCodingPanel: Setting up WebviewPanel');
+      this._panel = panel;
+      this._setupWebview(panel.webview);
+  }
+
   public async ask(question: string) {
     const msg = { type: 'userQuestion', message: question };
     
-    if (this._view && this._viewReady) {
-        this._view.webview.postMessage(msg);
+    if (this._webview && this._viewReady) {
+        this._webview.postMessage(msg);
         await this._handleChatMessage(question);
     } else {
         // Queue the message and ensure view is focused/created
         this._pendingMessages.push({ ...msg, isAsk: true });
-        vscode.commands.executeCommand('babycoding-view.focus');
+        // Try to focus whatever exists
+        if (this._panel) {
+            this._panel.reveal();
+        } else {
+            vscode.commands.executeCommand('babycoding-view-sidebar.focus');
+        }
     }
   }
 
@@ -45,16 +57,20 @@ export class BabyCodingPanel implements vscode.WebviewViewProvider {
     _token: vscode.CancellationToken
   ) {
     console.log('BabyCodingPanel.resolveWebviewView called');
-    this._view = webviewView;
+    this._setupWebview(webviewView.webview);
+  }
 
-    webviewView.webview.options = {
+  private _setupWebview(webview: vscode.Webview) {
+    this._webview = webview;
+
+    webview.options = {
       enableScripts: true,
       localResourceRoots: [this._extensionUri],
     };
 
-    webviewView.webview.html = this._getHtmlForWebview(webviewView.webview);
+    webview.html = this._getHtmlForWebview(webview);
 
-    webviewView.webview.onDidReceiveMessage(async (data) => {
+    webview.onDidReceiveMessage(async (data) => {
       switch (data.type) {
         case 'webviewReady': {
             console.log('Webview is ready');
@@ -62,17 +78,17 @@ export class BabyCodingPanel implements vscode.WebviewViewProvider {
             while (this._pendingMessages.length > 0) {
                 const msg = this._pendingMessages.shift();
                 if (msg.isAsk) {
-                    this._view?.webview.postMessage({ type: msg.type, message: msg.message });
+                    this._webview?.postMessage({ type: msg.type, message: msg.message });
                     await this._handleChatMessage(msg.message);
                 } else {
-                    this._view?.webview.postMessage(msg);
+                    this._webview?.postMessage(msg);
                 }
             }
             break;
         }
         case "startProject": {
             this._isPlanningMode = true;
-            this._view?.webview.postMessage({ type: 'chatResponse', message: "What do you want to build? (Tell me your idea, e.g., 'A snake game' or 'A personal website')\n\n你想做什么项目？（告诉我你的想法，比如“贪吃蛇游戏”或“个人网站”）" });
+            this._webview?.postMessage({ type: 'chatResponse', message: "What do you want to build? (Tell me your idea, e.g., 'A snake game' or 'A personal website')\n\n你想做什么项目？（告诉我你的想法，比如“贪吃蛇游戏”或“个人网站”）" });
             break;
         }
         case "setup": {
@@ -102,7 +118,7 @@ export class BabyCodingPanel implements vscode.WebviewViewProvider {
       const step = this._currentPlan.steps.find(s => s.id === stepId);
       if (!step) return;
 
-      this._view?.webview.postMessage({ type: 'chatResponse', message: `🚀 Executing Step: ${step.title}...\nExecuting: \`${step.command}\`` });
+      this._webview?.postMessage({ type: 'chatResponse', message: `🚀 Executing Step: ${step.title}...\nExecuting: \`${step.command}\`` });
 
       try {
           await this._builderAgent.executeStep(step);
@@ -111,12 +127,12 @@ export class BabyCodingPanel implements vscode.WebviewViewProvider {
           // Trigger Tutor to explain what happened.
           if (this._tutorAgent) {
               const explanation = await this._tutorAgent.explainSuccess(step);
-              this._view?.webview.postMessage({ type: 'chatResponse', message: `👨‍🏫 **Tutor**: ${explanation}` });
+              this._webview?.postMessage({ type: 'chatResponse', message: `👨‍🏫 **Tutor**: ${explanation}` });
           }
       } catch (error: any) {
           if (this._tutorAgent) {
               const explanation = await this._tutorAgent.explainError(step, error.message || "Unknown error");
-              this._view?.webview.postMessage({ type: 'chatResponse', message: `❌ **Error**: ${explanation}` });
+              this._webview?.postMessage({ type: 'chatResponse', message: `❌ **Error**: ${explanation}` });
           }
       }
   }
@@ -129,7 +145,7 @@ export class BabyCodingPanel implements vscode.WebviewViewProvider {
     const provider = config.get<string>('llm.provider') || 'openai';
 
     if (!apiKey) {
-        this._view?.webview.postMessage({ 
+        this._webview?.postMessage({ 
             type: 'chatResponse', 
             message: "⚠️ Please set your API Key in Settings first. Run 'Setup Wizard'." 
         });
@@ -142,16 +158,16 @@ export class BabyCodingPanel implements vscode.WebviewViewProvider {
         this._tutorAgent = new TutorAgent(this._llmService);
         return true;
     } catch (e: any) {
-        this._view?.webview.postMessage({ type: 'chatResponse', message: `Error: ${e.message}` });
+        this._webview?.postMessage({ type: 'chatResponse', message: `Error: ${e.message}` });
         return false;
     }
   }
 
   private async _handlePlanning(userIdea: string) {
-      if (!this._view) return;
+      if (!this._webview) return;
       if (!(await this._ensureLLM())) return;
 
-      this._view.webview.postMessage({ type: 'chatResponse', message: "Thinking about your project plan... (正在生成项目计划...)" });
+      this._webview.postMessage({ type: 'chatResponse', message: "Thinking about your project plan... (正在生成项目计划...)" });
 
       try {
           if (!this._plannerAgent) return;
@@ -161,20 +177,20 @@ export class BabyCodingPanel implements vscode.WebviewViewProvider {
           this._isPlanningMode = false; // Exit planning mode
           
           // Send Plan UI
-          this._view.webview.postMessage({ 
+          this._webview.postMessage({ 
               type: 'plan', 
               plan: plan 
           });
 
       } catch (error: any) {
-          this._view.webview.postMessage({ type: 'chatResponse', message: `Error generating plan: ${error.message}` });
+          this._webview.postMessage({ type: 'chatResponse', message: `Error generating plan: ${error.message}` });
       }
   }
 
   private async _handleSetup() {
-      if (!this._view) { return; }
+      if (!this._webview) { return; }
       
-      this._view.webview.postMessage({ type: 'chatResponse', message: "🔍 Checking your environment... (正在检查环境...)" });
+      this._webview.postMessage({ type: 'chatResponse', message: "🔍 Checking your environment... (正在检查环境...)" });
 
       const status = await EnvManager.checkEnvironment();
       const missing: string[] = [];
@@ -189,24 +205,24 @@ export class BabyCodingPanel implements vscode.WebviewViewProvider {
       report += `Python: ${status.python ? '✅ ' + status.pythonVersion : '❌ Not Found'}\n`;
       if (!status.python) missing.push('python');
 
-      this._view.webview.postMessage({ type: 'chatResponse', message: report });
+      this._webview.postMessage({ type: 'chatResponse', message: report });
 
       if (missing.length > 0) {
-          this._view.webview.postMessage({ type: 'chatResponse', message: "⚠️ Some tools are missing. I can generate install commands for you. (部分工具缺失，我可以为你生成安装命令。)" });
+          this._webview.postMessage({ type: 'chatResponse', message: "⚠️ Some tools are missing. I can generate install commands for you. (部分工具缺失，我可以为你生成安装命令。)" });
           const commands = EnvManager.getInstallCommands(missing);
           if (commands.length > 0) {
-              this._view.webview.postMessage({ 
+              this._webview.postMessage({ 
                   type: 'chatResponse', 
                   message: "Run these commands in your terminal (请在终端运行以下命令):\n\n" + commands.map(c => `\`${c}\``).join('\n') 
               });
           }
       } else {
-          this._view.webview.postMessage({ type: 'chatResponse', message: "🎉 All set! You are ready to start coding. (一切就绪！你可以开始编程了。)" });
+          this._webview.postMessage({ type: 'chatResponse', message: "🎉 All set! You are ready to start coding. (一切就绪！你可以开始编程了。)" });
       }
   }
 
   private async _handleChatMessage(userMessage: string) {
-      if (!this._view) { return; }
+      if (!this._webview) { return; }
       if (!(await this._ensureLLM())) return;
 
       // Update History
@@ -221,10 +237,10 @@ export class BabyCodingPanel implements vscode.WebviewViewProvider {
           this._chatHistory.push({ role: 'assistant', content: response.content });
 
           // Send response back to Webview
-          this._view.webview.postMessage({ type: 'chatResponse', message: response.content });
+          this._webview.postMessage({ type: 'chatResponse', message: response.content });
 
       } catch (error: any) {
-          this._view.webview.postMessage({ type: 'chatResponse', message: `Error: ${error.message}` });
+          this._webview.postMessage({ type: 'chatResponse', message: `Error: ${error.message}` });
       }
   }
 

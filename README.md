@@ -7,6 +7,17 @@
 ![Version](https://img.shields.io/badge/version-0.2.97-green.svg)
 ![Status](https://img.shields.io/badge/status-Alpha-orange.svg)
 
+> ⚠️ **Important Notice / 重要提示**  
+> Currently, the **Sidebar View** might not load correctly on some VS Code versions due to a known issue.  
+> If you see an empty sidebar or "No registered view provider" error, please use the **Command Palette** to open the main panel:  
+> 1. Press `Ctrl+Shift+P` (or `Cmd+Shift+P` on Mac).  
+> 2. Run command: `BabyCoding: Start Project`.  
+>  
+> 目前 **侧边栏视图** 在部分 VS Code 版本中可能无法正常加载。  
+> 如果您遇到侧边栏空白或报错，请使用 **命令面板** 打开主界面：  
+> 1. 按下 `Ctrl+Shift+P` (Mac 用户按 `Cmd+Shift+P`)。  
+> 2. 输入并运行命令：`BabyCoding: Start Project`。
+
 **BabyCoding** 是一个运行在 VS Code 中的插件，但它不仅仅是一个插件。它是为**零基础编程新手**设计的“操作系统”。它的目标是消除所有技术障碍（环境配置、命令行、Git、报错调试），让你只关注**想法**本身。
 
 从一个点子，到上线的真实项目，BabyCoding 全程陪伴，手把手教你“做中学”。

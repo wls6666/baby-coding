@@ -13,31 +13,6 @@ class SimpleProvider implements vscode.WebviewViewProvider {
                 <style>body{font-family:sans-serif;padding:10px;}</style>
             </head>
             <body>
-                <h1>BabyCoding Debug v0.2.95</h1>
-                <p>✅ View Provider Registered Successfully!</p>
-                <p>If you can see this, the core connection is working.</p>
-                <p>Time: ${new Date().toLocaleTimeString()}</p>
-            </body>
-            </html>
-        `;
-    }
-}
-
-console.log('BabyCoding: Extension file LOADED (Top Level)');
-
-// Inline Simple Provider to debug registration issues
-class SimpleProvider implements vscode.WebviewViewProvider {
-    resolveWebviewView(webviewView: vscode.WebviewView, _context: vscode.WebviewViewResolveContext, _token: vscode.CancellationToken) {
-        console.log('SimpleProvider.resolveWebviewView called');
-        webviewView.webview.options = { enableScripts: true };
-        webviewView.webview.html = `
-            <!DOCTYPE html>
-            <html>
-            <head>
-                <meta charset="UTF-8">
-                <style>body{font-family:sans-serif;padding:10px;}</style>
-            </head>
-            <body>
                 <h1>✅ SUCCESS!</h1>
                 <p>The View Provider is working.</p>
                 <p>BabyCoding ID: baby-coding-debug</p>
@@ -48,6 +23,8 @@ class SimpleProvider implements vscode.WebviewViewProvider {
         `;
     }
 }
+
+console.log('BabyCoding: Extension file LOADED (Top Level)');
 
 export function activate(context: vscode.ExtensionContext) {
     console.log('BabyCoding: activate() called - v0.0.2 DEBUG');
@@ -79,52 +56,6 @@ export function activate(context: vscode.ExtensionContext) {
         console.error('BabyCoding Provider Error:', e);
         vscode.window.showErrorMessage(`Provider Error: ${e}`);
     }
-
-        const VIEW_ID = 'babycoding-view';
-        console.log(`BabyCoding: Registering SimpleProvider for ${VIEW_ID}`);
-        
-        // Make provider persistent by assigning to a module-level variable or global
-        const provider = new SimpleProvider();
-        
-        // Pass context to subscription to ensure it lives as long as the extension
-        const registration = vscode.window.registerWebviewViewProvider(
-            VIEW_ID, 
-            provider,
-            { webviewOptions: { retainContextWhenHidden: true } }
-        );
-        
-        context.subscriptions.push(registration);
-        
-        // Add a secondary command to force-refresh the view
-        context.subscriptions.push(
-            vscode.commands.registerCommand('babycoding.refreshView', () => {
-                vscode.commands.executeCommand('workbench.view.extension.babycoding-sidebar');
-            })
-        );
-        
-        console.log('BabyCoding: Registered successfully');
-        vscode.window.showInformationMessage('BabyCoding: View Registered!');
-
-    } catch (error) {
-        console.error('BabyCoding Activation Error:', error);
-        vscode.window.showErrorMessage(`BabyCoding Error: ${error}`);
-    }
-
-    // Move command registration outside the try-catch block and ensure it happens
-    // Register commands regardless of view status
-    context.subscriptions.push(
-        vscode.commands.registerCommand('babycoding.start', () => {
-            vscode.window.showInformationMessage('BabyCoding: Start command executed!');
-            // Try to focus view when command is run
-            vscode.commands.executeCommand('babycoding-view.focus');
-        })
-    );
-    
-    context.subscriptions.push(
-        vscode.commands.registerCommand('babycoding.debug', () => {
-             vscode.window.showInformationMessage(`Extension Active: ${context.extension.id}`);
-        })
-    );
 }
 
 export function deactivate() {}

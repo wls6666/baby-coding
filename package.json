@@ -3,7 +3,7 @@
   "publisher": "babycoding-team",
   "displayName": "BabyCoding DEBUG MODE",
   "description": "A Beginner Dev OS for VS Code - Learn by Doing with AI",
-  "version": "0.0.2",
+  "version": "0.0.1",
   "license": "MIT",
   "repository": {
     "type": "git",
@@ -24,12 +24,12 @@
   "contributes": {
     "commands": [
       {
-        "command": "babycoding.start",
-        "title": "BabyCoding: Start Project"
+        "command": "babycoding.hello",
+        "title": "BabyCoding: Hello World"
       },
       {
-        "command": "babycoding.setup",
-        "title": "BabyCoding: Setup Wizard"
+        "command": "babycoding.start",
+        "title": "BabyCoding: Start Project"
       },
       {
         "command": "babycoding.askSelection",
@@ -58,7 +58,7 @@
       "babycoding-sidebar": [
         {
           "id": "babycoding-view",
-          "name": "Project Dashboard"
+          "name": "BabyCoding Debug"
         }
       ]
     },

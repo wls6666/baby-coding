@@ -1,0 +1,98 @@
+{
+  "name": "baby-coding",
+  "publisher": "babycoding-team",
+  "displayName": "BabyCoding",
+  "description": "A Beginner Dev OS for VS Code - Learn by Doing with AI",
+  "version": "0.1.0",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/babycoding/baby-coding.git"
+  },
+  "engines": {
+    "vscode": "^1.85.0"
+  },
+  "categories": [
+    "Other",
+    "Education"
+  ],
+  "activationEvents": [
+    "onCommand:babycoding.start",
+    "onView:babycoding-view"
+  ],
+  "main": "./out/extension.js",
+  "contributes": {
+    "commands": [
+      {
+        "command": "babycoding.start",
+        "title": "BabyCoding: Start Project"
+      },
+      {
+        "command": "babycoding.setup",
+        "title": "BabyCoding: Setup Wizard"
+      }
+    ],
+    "viewsContainers": {
+      "activitybar": [
+        {
+          "id": "babycoding-sidebar",
+          "title": "BabyCoding",
+          "icon": "resources/icon.svg"
+        }
+      ]
+    },
+    "views": {
+      "babycoding-sidebar": [
+        {
+          "id": "babycoding-view",
+          "name": "Project Dashboard"
+        }
+      ]
+    },
+    "configuration": {
+      "title": "BabyCoding",
+      "properties": {
+        "babycoding.llm.provider": {
+          "type": "string",
+          "enum": [
+            "openai",
+            "gemini"
+          ],
+          "default": "openai",
+          "description": "Select the AI Provider"
+        },
+        "babycoding.llm.apiKey": {
+          "type": "string",
+          "default": "",
+          "description": "API Key for the selected provider"
+        }
+      }
+    }
+  },
+  "scripts": {
+    "vscode:prepublish": "npm run compile",
+    "compile": "tsc -p ./",
+    "watch": "tsc -watch -p ./",
+    "pretest": "npm run compile && npm run lint",
+    "lint": "eslint src --ext ts",
+    "test": "node ./out/test/runTest.js"
+  },
+  "devDependencies": {
+    "@types/glob": "^8.1.0",
+    "@types/mocha": "^10.0.6",
+    "@types/node": "20.x",
+    "@types/vscode": "^1.85.0",
+    "@typescript-eslint/eslint-plugin": "^6.13.1",
+    "@typescript-eslint/parser": "^6.13.1",
+    "@vscode/test-electron": "^2.3.8",
+    "@vscode/vsce": "^3.7.1",
+    "eslint": "^8.54.0",
+    "glob": "^10.3.10",
+    "mocha": "^10.2.0",
+    "typescript": "^5.3.2"
+  },
+  "dependencies": {
+    "axios": "^1.6.2",
+    "openai": "^4.20.1"
+  }
+}

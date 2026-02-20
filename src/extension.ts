@@ -31,7 +31,7 @@ export function activate(context: vscode.ExtensionContext) {
         console.log('BabyCoding: WebviewViewProvider registered successfully');
         vscode.window.showInformationMessage('BabyCoding: Ready!');
 
-        // ... rest of commands ...
+        let askSelectionDisposable = vscode.commands.registerCommand('babycoding.askSelection', () => {
             const editor = vscode.window.activeTextEditor;
             if (editor) {
                 const selection = editor.selection;

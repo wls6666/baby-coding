@@ -3,7 +3,7 @@
   "publisher": "babycoding-team",
   "displayName": "BabyCoding",
   "description": "A Beginner Dev OS for VS Code - Learn by Doing with AI",
-  "version": "0.2.7",
+  "version": "0.2.8",
   "license": "MIT",
   "repository": {
     "type": "git",
@@ -19,7 +19,7 @@
   "activationEvents": [
     "onStartupFinished",
     "onCommand:babycoding.start",
-    "onView:babycoding-view"
+    "onView:babycoding-view-v2"
   ],
   "main": "./out/extension.js",
   "contributes": {
@@ -49,16 +49,16 @@
     "viewsContainers": {
       "activitybar": [
         {
-          "id": "babycoding-sidebar",
+          "id": "babycoding-sidebar-v2",
           "title": "BabyCoding",
           "icon": "icon.jpg"
         }
       ]
     },
     "views": {
-      "babycoding-sidebar": [
+      "babycoding-sidebar-v2": [
         {
-          "id": "babycoding-view",
+          "id": "babycoding-view-v2",
           "name": "Project Dashboard"
         }
       ]

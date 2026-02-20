@@ -31,7 +31,7 @@ export function activate(context: vscode.ExtensionContext) {
                 const selection = editor.selection;
                 const text = editor.document.getText(selection);
                 if (text) {
-                    vscode.commands.executeCommand('babycoding-view.focus');
+                    vscode.commands.executeCommand('babycoding-view-v2.focus');
                     provider.ask(`Explain this code:\n\`\`\`\n${text}\n\`\`\``);
                 } else {
                     vscode.window.showInformationMessage('Please select some code first.');

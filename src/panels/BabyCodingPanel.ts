@@ -6,7 +6,7 @@ import { BuilderAgent } from "../agents/builder";
 import { TutorAgent } from "../agents/tutor";
 
 export class BabyCodingPanel implements vscode.WebviewViewProvider {
-  public static readonly viewType = "babycoding-view";
+  public static readonly viewType = "babycoding-view-v2";
   private _view?: vscode.WebviewView;
   private _llmService?: LLMService;
   private _plannerAgent?: PlannerAgent;
@@ -22,6 +22,7 @@ export class BabyCodingPanel implements vscode.WebviewViewProvider {
   ];
 
   constructor(private readonly _extensionUri: vscode.Uri) {
+      console.log('BabyCodingPanel: Constructor called');
       this._builderAgent = new BuilderAgent();
   }
 

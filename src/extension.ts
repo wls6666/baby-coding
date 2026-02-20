@@ -23,10 +23,18 @@ class SimpleProvider implements vscode.WebviewViewProvider {
     }
 }
 
+console.log('BabyCoding: Extension file LOADED (Top Level)');
+
 export function activate(context: vscode.ExtensionContext) {
-    console.log('BabyCoding: activate() called - v0.2.95');
-    // Show a message immediately to confirm activation
-    vscode.window.showInformationMessage('BabyCoding: v0.2.95 Activating...');
+    console.log('BabyCoding: activate() called - v0.0.1 DEBUG');
+    vscode.window.showInformationMessage('BabyCoding DEBUG: Extension Loaded!');
+
+    // Register a simple Hello World command to verify basic functionality
+    context.subscriptions.push(
+        vscode.commands.registerCommand('babycoding.hello', () => {
+            vscode.window.showInformationMessage('Hello from BabyCoding Debug!');
+        })
+    );
 
     try {
         const VIEW_ID = 'babycoding-view';

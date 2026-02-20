@@ -1,9 +1,9 @@
 {
-  "name": "baby-coding",
+  "name": "baby-coding-debug",
   "publisher": "babycoding-team",
-  "displayName": "BabyCoding",
+  "displayName": "BabyCoding DEBUG MODE",
   "description": "A Beginner Dev OS for VS Code - Learn by Doing with AI",
-  "version": "0.2.97",
+  "version": "0.0.1",
   "license": "MIT",
   "repository": {
     "type": "git",

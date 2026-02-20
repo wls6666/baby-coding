@@ -3,7 +3,7 @@
   "publisher": "babycoding-team",
   "displayName": "BabyCoding",
   "description": "A Beginner Dev OS for VS Code - Learn by Doing with AI",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "license": "MIT",
   "repository": {
     "type": "git",
@@ -30,8 +30,21 @@
       {
         "command": "babycoding.setup",
         "title": "BabyCoding: Setup Wizard"
+      },
+      {
+        "command": "babycoding.askSelection",
+        "title": "Ask BabyCoding"
       }
     ],
+    "menus": {
+      "editor/context": [
+        {
+          "command": "babycoding.askSelection",
+          "group": "babycoding",
+          "when": "editorHasSelection"
+        }
+      ]
+    },
     "viewsContainers": {
       "activitybar": [
         {

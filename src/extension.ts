@@ -10,6 +10,21 @@ export function activate(context: vscode.ExtensionContext) {
         vscode.window.registerWebviewViewProvider(BabyCodingPanel.viewType, provider)
     );
 
+    let askSelectionDisposable = vscode.commands.registerCommand('babycoding.askSelection', () => {
+        const editor = vscode.window.activeTextEditor;
+        if (editor) {
+            const selection = editor.selection;
+            const text = editor.document.getText(selection);
+            if (text) {
+                vscode.commands.executeCommand('babycoding-view.focus');
+                provider.ask(`Explain this code:\n\`\`\`\n${text}\n\`\`\``);
+            } else {
+                vscode.window.showInformationMessage('Please select some code first.');
+            }
+        }
+    });
+    context.subscriptions.push(askSelectionDisposable);
+
 	let startDisposable = vscode.commands.registerCommand('babycoding.start', () => {
 		vscode.window.showInformationMessage('BabyCoding: Let\'s build something!');
 	});

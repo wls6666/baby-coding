@@ -23,6 +23,13 @@ export class BabyCodingPanel implements vscode.WebviewViewProvider {
       this._builderAgent = new BuilderAgent();
   }
 
+  public async ask(question: string) {
+    if (this._view) {
+        this._view.webview.postMessage({ type: 'userQuestion', message: question });
+        await this._handleChatMessage(question);
+    }
+  }
+
   public resolveWebviewView(
     webviewView: vscode.WebviewView,
     _context: vscode.WebviewViewResolveContext,
@@ -388,6 +395,9 @@ export class BabyCodingPanel implements vscode.WebviewViewProvider {
                 switch (message.type) {
                     case 'chatResponse':
                         addMessage(message.message, 'ai-message');
+                        break;
+                    case 'userQuestion':
+                        addMessage(message.message, 'user-message');
                         break;
                     case 'plan':
                         renderPlan(message.plan);

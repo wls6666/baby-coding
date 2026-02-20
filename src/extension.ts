@@ -9,12 +9,15 @@ export function activate(context: vscode.ExtensionContext) {
 
     try {
         // Register the Webview View Provider
-        console.log('BabyCoding: Registering provider for', BabyCodingPanel.viewType);
+        // Hardcoded view ID to ensure match with package.json
+        const VIEW_ID = 'babycoding-view';
+        console.log('BabyCoding: Registering provider for', VIEW_ID);
+        
         const provider = new BabyCodingPanel(context.extensionUri);
         
         // Ensure the registration is pushed to subscriptions immediately
         const registration = vscode.window.registerWebviewViewProvider(
-            BabyCodingPanel.viewType, 
+            VIEW_ID, 
             provider,
             {
                 webviewOptions: { retainContextWhenHidden: true }
